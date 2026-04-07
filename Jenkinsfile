@@ -14,11 +14,7 @@ pipeline {
     }
 
     stages {
-        stage("install Docker") {
-            steps {
-                sh "sudo apt install docker.io -y"
-            }
-        }
+
         stage("Check Docker") {
             steps {
                 sh "docker --version"
@@ -59,9 +55,7 @@ pipeline {
 
         stage("Remove Old Container") {
             steps {
-                sh """
-                docker rm -f ${CONTAINER_NAME} || true
-                """
+                sh "docker rm -f ${CONTAINER_NAME} || true"
             }
         }
 
@@ -78,13 +72,11 @@ pipeline {
 
         stage("Clean Up Images") {
             steps {
-                sh """
-                docker rmi ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${VERSION} || true
-                """
+                sh "docker rmi ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${VERSION} || true"
             }
         }
+
         stage('Run Ansible Playbook') {
-            agent any
             steps {
                 sh 'ansible-playbook -i inventory playbook.yml'
             }

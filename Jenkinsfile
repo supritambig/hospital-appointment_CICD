@@ -14,7 +14,11 @@ pipeline {
     }
 
     stages {
-
+        stage("install Docker") {
+            steps {
+                sh "apt install docker.io -y"
+            }
+        }
         stage("Check Docker") {
             steps {
                 sh "docker --version"

@@ -17,21 +17,21 @@ pipeline {
 
         stage("Check Docker") {
             steps {
-                sh "docker --version"
+                sh "sudo docker --version"
             }
         }
 
         stage("Build Docker Image") {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE} ."
+                sh "sudo docker build -t ${DOCKER_IMAGE} ."
             }
         }
 
         stage("Tag Image") {
             steps {
                 sh """
-                docker tag ${DOCKER_IMAGE} ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${VERSION}
-                docker tag ${DOCKER_IMAGE} ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:latest
+                sudo docker tag ${DOCKER_IMAGE} ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${VERSION}
+                sudo docker tag ${DOCKER_IMAGE} ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:latest
                 """
             }
         }

@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label "slave_node_java"
+    }
 
     environment {
         DOCKERHUB_USERNAME = 'suprit43'

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Register - MediBook</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; display: flex; flex-direction: column; min-height: 100vh; }
+        nav { background: #1a73e8; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+        nav .brand { color: white; font-size: 1.3rem; font-weight: 700; text-decoration: none; }
+        nav a { color: #d0e4ff; text-decoration: none; margin-left: 20px; }
+        .page { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+        .card { background: white; border-radius: 14px; padding: 36px; width: 100%; max-width: 520px; box-shadow: 0 4px 20px rgba(0,0,0,0.10); }
+        h2 { color: #1a73e8; margin-bottom: 6px; }
+        .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 24px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form-group { margin-bottom: 16px; }
+        label { font-weight: 600; font-size: 0.88rem; color: #555; display: block; margin-bottom: 4px; }
+        input, select {
+            width: 100%; padding: 10px 13px; border: 1px solid #cdd5e0;
+            border-radius: 8px; font-size: 0.95rem;
+        }
+        input:focus, select:focus { outline: none; border-color: #1a73e8; }
+        .btn { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 6px; }
+        .btn:hover { background: #1558c0; }
+        .login-link { text-align: center; margin-top: 18px; font-size: 0.9rem; color: #666; }
+        .login-link a { color: #1a73e8; font-weight: 600; }
+        .alert { padding: 10px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: 500; }
+        .alert-success { background: #e8f5e9; color: #2e7d32; }
+    </style>
+</head>
+<body>
+<nav>
+    <a class="brand" href="/">🏥 MediBook</a>
+    <div><a href="/login">Login</a><a href="/register" style="margin-left:20px">Register</a></div>
+</nav>
+<div class="page">
+    <div class="card">
+        <h2>Create Account</h2>
+        <p class="subtitle">Register to book your appointments</p>
+
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+        <form th:action="@{/register}" th:object="${patient}" method="post">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" th:field="*{fullName}" placeholder="John Doe" required/>
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" th:field="*{age}" placeholder="25" required/>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select th:field="*{gender}" required>
+                        <option value="">-- Select --</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="number" th:field="*{phoneNumber}" placeholder="9876543210" required/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" th:field="*{emailId}" placeholder="john@email.com" required/>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" th:field="*{password}" placeholder="Create a strong password" required/>
+            </div>
+            <button type="submit" class="btn">Register</button>
+        </form>
+        <div class="login-link">Already have an account? <a href="/login">Login here</a></div>
+    </div>
+</div>
+</body>
+</html>

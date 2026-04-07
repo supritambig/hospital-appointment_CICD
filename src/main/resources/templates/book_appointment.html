@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Book Appointment - MediBook</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
+        nav { background: #1a73e8; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+        nav .brand { color: white; font-size: 1.3rem; font-weight: 700; text-decoration: none; }
+        nav a { color: #d0e4ff; text-decoration: none; margin-left: 20px; font-size: 0.95rem; }
+        .container { max-width: 700px; margin: 40px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 14px; padding: 36px; box-shadow: 0 4px 20px rgba(0,0,0,0.09); }
+        h2 { color: #1a73e8; margin-bottom: 6px; }
+        .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 26px; }
+        .form-group { margin-bottom: 18px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        label { font-weight: 600; font-size: 0.88rem; color: #555; display: block; margin-bottom: 5px; }
+        input, select, textarea {
+            width: 100%; padding: 10px 13px; border: 1px solid #cdd5e0;
+            border-radius: 8px; font-size: 0.95rem;
+        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #1a73e8; }
+        textarea { resize: vertical; min-height: 80px; }
+        .doctor-card {
+            border: 2px solid #e8eaf0; border-radius: 10px; padding: 14px 16px;
+            cursor: pointer; margin-bottom: 10px; transition: all 0.2s;
+        }
+        .doctor-card:hover { border-color: #1a73e8; background: #f5f8ff; }
+        .doctor-card input[type=radio] { margin-right: 10px; accent-color: #1a73e8; }
+        .doctor-name { font-weight: 700; color: #222; }
+        .doctor-meta { font-size: 0.83rem; color: #777; margin-top: 3px; }
+        .btn { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+        .btn:hover { background: #1558c0; }
+        .back-link { margin-bottom: 18px; display: inline-block; color: #1a73e8; text-decoration: none; font-size: 0.9rem; }
+        .section-title { font-size: 0.88rem; font-weight: 700; color: #555; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+<nav>
+    <a class="brand" href="/">🏥 MediBook</a>
+    <div>
+        <a href="/patient/dashboard">My Appointments</a>
+        <a href="/logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <a href="/patient/dashboard" class="back-link">← Back to Dashboard</a>
+    <div class="card">
+        <h2>📅 Book Appointment</h2>
+        <p class="subtitle">Choose a doctor and pick your preferred date and time</p>
+
+        <form th:action="@{/patient/book}" method="post">
+
+            <!-- Doctor Selection -->
+            <div class="form-group">
+                <div class="section-title">Select Doctor</div>
+                <div th:each="doc : ${doctors}">
+                    <label class="doctor-card">
+                        <input type="radio" name="doctor.doctorId" th:value="${doc.doctorId}" required/>
+                        <span class="doctor-name" th:text="${doc.fullName}"></span>
+                        <div class="doctor-meta">
+                            🩺 <span th:text="${doc.specialization}"></span> &nbsp;|&nbsp;
+                            🎓 <span th:text="${doc.qualification}"></span> &nbsp;|&nbsp;
+                            🕐 <span th:text="${doc.availableTime}"></span> &nbsp;|&nbsp;
+                            📆 <span th:text="${doc.availableDays}"></span>
+                        </div>
+                    </label>
+                </div>
+                <div th:if="${doctors.isEmpty()}" style="color:#aaa; padding:16px; text-align:center;">
+                    No doctors available. Please check back later.
+                </div>
+            </div>
+
+            <!-- Date & Time -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Appointment Date</label>
+                    <input type="date" name="appointmentDate" required
+                           th:attr="min=${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
+                </div>
+                <div class="form-group">
+                    <label>Preferred Time</label>
+                    <input type="time" name="appointmentTime" required/>
+                </div>
+            </div>
+
+            <!-- Reason -->
+            <div class="form-group">
+                <label>Reason for Visit</label>
+                <textarea name="reason" placeholder="Briefly describe your symptoms or reason..." required></textarea>
+            </div>
+
+            <input type="hidden" name="doctorId" value="0"/>
+            <button type="submit" class="btn">Confirm Booking</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

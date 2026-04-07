@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Patients - MediBook Admin</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
+        nav { background: #0d47a1; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+        nav .brand { color: white; font-size: 1.3rem; font-weight: 700; text-decoration: none; }
+        nav a { color: #b0c4f5; text-decoration: none; margin-left: 20px; font-size: 0.95rem; }
+        nav a:hover { color: white; }
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        h2 { color: #0d47a1; margin-bottom: 22px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+        th, td { padding: 11px 13px; text-align: left; border-bottom: 1px solid #e8eaf0; }
+        th { background: #f0f4ff; color: #0d47a1; font-weight: 600; font-size: 0.84rem; text-transform: uppercase; }
+        tr:hover { background: #fafbff; }
+        .btn-del { padding: 5px 12px; background: #e53935; color: white; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+        .btn-del:hover { opacity: 0.85; }
+        .empty { text-align: center; padding: 50px; color: #bbb; }
+    </style>
+</head>
+<body>
+<nav>
+    <a class="brand" href="/">🏥 MediBook Admin</a>
+    <div>
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/appointments">Appointments</a>
+        <a href="/admin/doctors">Doctors</a>
+        <a href="/admin/patients">Patients</a>
+        <a href="/logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="card">
+        <h2>🧑‍🤝‍🧑 Registered Patients</h2>
+        <div th:if="${patients.isEmpty()}" class="empty">No patients registered yet.</div>
+        <table th:unless="${patients.isEmpty()}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Gender</th>
+                    <th>Age</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="pat, i : ${patients}">
+                    <td th:text="${i.count}"></td>
+                    <td th:text="${pat.fullName}"></td>
+                    <td th:text="${pat.emailId}"></td>
+                    <td th:text="${pat.phoneNumber}"></td>
+                    <td th:text="${pat.gender}"></td>
+                    <td th:text="${pat.age}"></td>
+                    <td>
+                        <form th:action="@{/admin/patients/delete/{id}(id=${pat.patientId})}" method="post"
+                              onsubmit="return confirm('Delete this patient?')">
+                            <button type="submit" class="btn-del">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

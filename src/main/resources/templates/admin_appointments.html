@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>All Appointments - MediBook Admin</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
+        nav { background: #0d47a1; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+        nav .brand { color: white; font-size: 1.3rem; font-weight: 700; text-decoration: none; }
+        nav a { color: #b0c4f5; text-decoration: none; margin-left: 20px; font-size: 0.95rem; }
+        nav a:hover { color: white; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        h2 { color: #0d47a1; margin-bottom: 22px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+        th, td { padding: 11px 13px; text-align: left; border-bottom: 1px solid #e8eaf0; }
+        th { background: #f0f4ff; color: #0d47a1; font-weight: 600; font-size: 0.84rem; text-transform: uppercase; }
+        tr:hover { background: #fafbff; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; }
+        .badge-pending   { background: #fff3e0; color: #e65100; }
+        .badge-confirmed { background: #e8f5e9; color: #2e7d32; }
+        .badge-cancelled { background: #ffebee; color: #c62828; }
+        .action-form { display: inline; }
+        select.status-sel { padding: 5px 8px; border-radius: 6px; border: 1px solid #cdd5e0; font-size: 0.82rem; cursor: pointer; }
+        .btn-sm { padding: 5px 12px; font-size: 0.8rem; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; }
+        .btn-confirm { background: #1a73e8; color: white; }
+        .btn-cancel  { background: #e53935; color: white; margin-left: 6px; }
+        .btn-sm:hover { opacity: 0.85; }
+        .empty { text-align: center; padding: 50px; color: #bbb; }
+    </style>
+</head>
+<body>
+<nav>
+    <a class="brand" href="/">🏥 MediBook Admin</a>
+    <div>
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/appointments">Appointments</a>
+        <a href="/admin/doctors">Doctors</a>
+        <a href="/admin/patients">Patients</a>
+        <a href="/logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="card">
+        <h2>📋 All Appointments</h2>
+        <div th:if="${appointments.isEmpty()}" class="empty">No appointments found.</div>
+        <table th:unless="${appointments.isEmpty()}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Specialization</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="appt, i : ${appointments}">
+                    <td th:text="${i.count}"></td>
+                    <td th:text="${appt.patient.fullName}"></td>
+                    <td th:text="${appt.doctor.fullName}"></td>
+                    <td th:text="${appt.doctor.specialization}"></td>
+                    <td th:text="${appt.appointmentDate}"></td>
+                    <td th:text="${appt.appointmentTime}"></td>
+                    <td th:text="${appt.reason}"></td>
+                    <td>
+                        <span th:class="${'badge badge-' + appt.status.toLowerCase()}"
+                              th:text="${appt.status}"></span>
+                    </td>
+                    <td>
+                        <form th:action="@{/admin/appointments/status/{id}(id=${appt.appointmentId})}" method="post" class="action-form">
+                            <input type="hidden" name="status" value="CONFIRMED"/>
+                            <button type="submit" class="btn-sm btn-confirm"
+                                    th:disabled="${appt.status == 'CONFIRMED' || appt.status == 'CANCELLED'}">
+                                ✓ Confirm
+                            </button>
+                        </form>
+                        <form th:action="@{/admin/appointments/status/{id}(id=${appt.appointmentId})}" method="post" class="action-form">
+                            <input type="hidden" name="status" value="CANCELLED"/>
+                            <button type="submit" class="btn-sm btn-cancel"
+                                    th:disabled="${appt.status == 'CANCELLED'}"
+                                    onclick="return confirm('Cancel this appointment?')">
+                                ✗ Cancel
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

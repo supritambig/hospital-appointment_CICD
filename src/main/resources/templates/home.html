@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>MediBook - Hospital Appointment System</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
+        nav { background: #1a73e8; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+        nav .brand { color: white; font-size: 1.3rem; font-weight: 700; text-decoration: none; }
+        nav a { color: #d0e4ff; text-decoration: none; margin-left: 20px; font-size: 0.95rem; }
+        nav a:hover { color: white; }
+        .hero {
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            color: white; text-align: center; padding: 90px 20px;
+        }
+        .hero h1 { font-size: 2.8rem; margin-bottom: 16px; }
+        .hero p  { font-size: 1.15rem; opacity: 0.9; margin-bottom: 32px; }
+        .hero-btns a {
+            display: inline-block; padding: 13px 32px; border-radius: 30px;
+            font-weight: 700; text-decoration: none; margin: 6px 10px; font-size: 1rem;
+        }
+        .btn-white { background: white; color: #1a73e8; }
+        .btn-outline { border: 2px solid white; color: white; }
+        .features {
+            max-width: 1000px; margin: 60px auto; padding: 0 20px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px;
+        }
+        .feat-card {
+            background: white; border-radius: 14px; padding: 28px 24px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center;
+        }
+        .feat-card .icon { font-size: 2.4rem; margin-bottom: 14px; }
+        .feat-card h3  { color: #1a73e8; margin-bottom: 10px; }
+        .feat-card p   { color: #666; font-size: 0.93rem; line-height: 1.5; }
+        footer { text-align: center; padding: 30px; color: #999; font-size: 0.88rem; }
+    </style>
+</head>
+<body>
+<nav>
+    <a class="brand" href="/">🏥 MediBook</a>
+    <div>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>Your Health, Our Priority</h1>
+    <p>Book appointments with top doctors easily and quickly.</p>
+    <div class="hero-btns">
+        <a href="/register" class="btn-white">Get Started</a>
+        <a href="/login" class="btn-outline">Login</a>
+    </div>
+</div>
+
+<div class="features">
+    <div class="feat-card">
+        <div class="icon">📅</div>
+        <h3>Easy Booking</h3>
+        <p>Book your appointment in just a few clicks with your preferred doctor.</p>
+    </div>
+    <div class="feat-card">
+        <div class="icon">👨‍⚕️</div>
+        <h3>Top Specialists</h3>
+        <p>Access a wide range of specialist doctors across multiple departments.</p>
+    </div>
+    <div class="feat-card">
+        <div class="icon">🔔</div>
+        <h3>Status Tracking</h3>
+        <p>Track your appointment status — Pending, Confirmed, or Cancelled.</p>
+    </div>
+</div>
+
+<footer>© 2025 MediBook Hospital System. All rights reserved.</footer>
+</body>
+</html>

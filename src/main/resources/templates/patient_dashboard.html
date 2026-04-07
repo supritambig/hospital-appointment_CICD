@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>My Dashboard - MediBook</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
+        nav { background: #1a73e8; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; }
+        nav .brand { color: white; font-size: 1.3rem; font-weight: 700; text-decoration: none; }
+        nav a { color: #d0e4ff; text-decoration: none; margin-left: 20px; font-size: 0.95rem; }
+        nav a:hover { color: white; }
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        .welcome { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: white; border-radius: 14px; padding: 28px 32px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; }
+        .welcome h2 { font-size: 1.6rem; }
+        .welcome p  { opacity: 0.85; margin-top: 5px; }
+        .btn { display: inline-block; padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s; }
+        .btn:hover { opacity: 0.85; }
+        .btn-white   { background: white; color: #1a73e8; }
+        .btn-danger  { background: #e53935; color: white; }
+        .btn-sm { padding: 5px 12px; font-size: 0.82rem; }
+        .card { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 24px; }
+        h3 { color: #1a73e8; margin-bottom: 18px; font-size: 1.15rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e8eaf0; }
+        th { background: #f5f7ff; color: #1a73e8; font-weight: 600; font-size: 0.88rem; }
+        tr:hover { background: #fafbff; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; }
+        .badge-pending   { background: #fff3e0; color: #e65100; }
+        .badge-confirmed { background: #e8f5e9; color: #2e7d32; }
+        .badge-cancelled { background: #ffebee; color: #c62828; }
+        .empty { text-align: center; padding: 40px; color: #aaa; }
+        .empty .icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .alert { padding: 12px 18px; border-radius: 8px; margin-bottom: 18px; font-weight: 500; }
+        .alert-success { background: #e8f5e9; color: #2e7d32; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+        .info-item label { font-size: 0.8rem; color: #888; display: block; margin-bottom: 3px; }
+        .info-item span  { font-weight: 600; color: #333; }
+    </style>
+</head>
+<body>
+<nav>
+    <a class="brand" href="/">🏥 MediBook</a>
+    <div>
+        <a href="/patient/book">+ Book Appointment</a>
+        <a href="/patient/dashboard">My Appointments</a>
+        <a href="/logout">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="welcome">
+        <div>
+            <h2>Hello, <span th:text="${patient.fullName}">Patient</span> 👋</h2>
+            <p>Manage your appointments below</p>
+        </div>
+        <a href="/patient/book" class="btn btn-white">+ Book New Appointment</a>
+    </div>
+
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+    <!-- Patient Info -->
+    <div class="card">
+        <h3>👤 My Profile</h3>
+        <div class="info-grid">
+            <div class="info-item"><label>Email</label><span th:text="${patient.emailId}"></span></div>
+            <div class="info-item"><label>Phone</label><span th:text="${patient.phoneNumber}"></span></div>
+            <div class="info-item"><label>Gender</label><span th:text="${patient.gender}"></span></div>
+            <div class="info-item"><label>Age</label><span th:text="${patient.age}"></span></div>
+        </div>
+    </div>
+
+    <!-- Appointments -->
+    <div class="card">
+        <h3>📅 My Appointments</h3>
+        <div th:if="${appointments.isEmpty()}" class="empty">
+            <div class="icon">📭</div>
+            <p>No appointments yet. <a href="/patient/book" style="color:#1a73e8">Book one now!</a></p>
+        </div>
+        <table th:unless="${appointments.isEmpty()}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Doctor</th>
+                    <th>Specialization</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="appt, i : ${appointments}">
+                    <td th:text="${i.count}"></td>
+                    <td th:text="${appt.doctor.fullName}"></td>
+                    <td th:text="${appt.doctor.specialization}"></td>
+                    <td th:text="${appt.appointmentDate}"></td>
+                    <td th:text="${appt.appointmentTime}"></td>
+                    <td th:text="${appt.reason}"></td>
+                    <td>
+                        <span th:class="${'badge badge-' + appt.status.toLowerCase()}"
+                              th:text="${appt.status}"></span>
+                    </td>
+                    <td>
+                        <form th:if="${appt.status != 'CANCELLED'}"
+                              th:action="@{/patient/cancel/{id}(id=${appt.appointmentId})}" method="post"
+                              onsubmit="return confirm('Cancel this appointment?')">
+                            <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                        </form>
+                        <span th:if="${appt.status == 'CANCELLED'}" style="color:#bbb;font-size:0.85rem">—</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

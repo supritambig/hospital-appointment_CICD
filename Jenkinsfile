@@ -1,6 +1,10 @@
 pipeline {
     agent { label "slave_node_java" }
 
+    tools {
+        maven 'Maven 3'
+    }
+
     environment {
         DOCKERHUB_USERNAME = 'suprit43'
         DOCKERHUB_REPO = 'hp_webapp'
@@ -42,7 +46,6 @@ pipeline {
         stage('Deploy via Ansible') {
             steps {
                 sh '''
-                cd ansible
                 ansible-playbook -i inventory.ini deploy.yml --extra-vars "tag=${BUILD_ID}"
                 '''
             }

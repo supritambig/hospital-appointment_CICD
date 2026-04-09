@@ -1,14 +1,36 @@
----
-- name: Deploy Docker Container
-  hosts: dev
+- name: Deploy Hospital App
+  hosts: app-server
   become: yes
+
+  vars:
+    image_name: supritambig/hospital-app
+    tag: "{{ tag }}"
+    container_name: hospital-app
+    port: 8080
 
   tasks:
 
-    - name: Run Docker Container
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Remove old container
       docker_container:
-        name: webapp
-        image: suprit43/dockerpr-webapp:latest
+        name: "{{ container_name }}"
+        state: absent
+
+    - name: Run new container
+      docker_container:
+        name: "{{ container_name }}"
+        image: "{{ image_name }}:{{ tag }}"
         state: started
         ports:
-          - "8085:80"
+          - "{{ port }}:8080"

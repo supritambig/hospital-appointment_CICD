@@ -37,6 +37,12 @@
       community.docker.docker_container:
         name: "{{ container_name }}"
         state: absent
+    # Wait for DB
+    - name: Wait for MySQL to be ready
+      shell: |
+        until docker exec mysql-db mysqladmin ping -h "localhost" --silent; do
+          sleep 5
+        done
 
     # 🔹 Run Application Container
     - name: Run new container

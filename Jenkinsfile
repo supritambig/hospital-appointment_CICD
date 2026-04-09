@@ -78,10 +78,14 @@ pipeline {
             }
         }
 
-        stage('Run Ansible Playbook') {
-            agent any
+        stage('Deploy via Ansible') {
             steps {
-                sh 'ansible-playbook -i inventory playbook.yml'
+                sshagent(['ec2-key']) {   // 🔥 USE SSH KEY FROM JENKINS
+                    sh '''
+                    ANSIBLE_HOST_KEY_CHECKING=False \
+                    ansible-playbook -i inventory playbook.yml --extra-vars "tag=${BUILD_ID}"
+                    '''
+                }
             }
         }
         stage("Cleanup") {

@@ -28,6 +28,34 @@ pipeline {
                 sh 'mvn clean package -DskipTests'
             }
         }
+        stage('Install Docker') {
+    steps {
+        sh '''
+        if ! command -v docker > /dev/null; then
+            echo "Installing Docker..."
+
+            # Update packages
+            sudo apt update
+
+            # Install Docker
+            sudo apt install docker.io -y
+
+            # Start and enable Docker
+            sudo systemctl start docker
+            sudo systemctl enable docker
+
+            # Fix permission (important for Jenkins user)
+            sudo chmod 666 /var/run/docker.sock
+
+            echo "Docker installed successfully"
+        else
+            echo "Docker already installed"
+        fi
+
+        docker --version
+        '''
+    }
+}
 
         stage("Build Docker Image") {
             steps {

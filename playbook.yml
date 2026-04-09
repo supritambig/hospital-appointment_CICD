@@ -3,34 +3,23 @@
   become: yes
 
   vars:
-    image_name: supritambig/hospital-app
+    image_name: suprit43/hp_webapp
     tag: "{{ tag }}"
     container_name: hospital-app
-    port: 8080
+    port: 80
 
   tasks:
 
-    - name: Install Docker
-      apt:
-        name: docker.io
-        state: present
-        update_cache: yes
-
-    - name: Start Docker
-      service:
-        name: docker
-        state: started
-        enabled: yes
-
     - name: Remove old container
-      docker_container:
+      community.docker.docker_container:
         name: "{{ container_name }}"
         state: absent
 
     - name: Run new container
-      docker_container:
+      community.docker.docker_container:
         name: "{{ container_name }}"
         image: "{{ image_name }}:{{ tag }}"
         state: started
+        restart_policy: always
         ports:
           - "{{ port }}:8080"

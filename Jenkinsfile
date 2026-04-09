@@ -78,10 +78,11 @@ pipeline {
             }
         }
 
-        stage('Run Ansible Playbook') {
-            agent any
+        stage('Deploy via Ansible') {
             steps {
-                sh 'ansible-playbook -i inventory playbook.yml'
+                sh '''
+                ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.ini deploy.yml --extra-vars "tag=${BUILD_ID}"
+                '''
             }
         }
         stage("Cleanup") {

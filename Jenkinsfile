@@ -78,14 +78,12 @@ pipeline {
             }
         }
 
-        stage('Deploy via Ansible') {
+        stage('Run Ansible Playbook') {
+            agent any
             steps {
-                sh '''
-                ansible-playbook -i inventory.ini deploy.yml --extra-vars "tag=${BUILD_ID}"
-                '''
+                sh 'ansible-playbook -i inventory playbook.yml'
             }
         }
-
         stage("Cleanup") {
             steps {
                 sh "docker image prune -f"

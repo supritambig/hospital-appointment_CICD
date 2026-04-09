@@ -23,4 +23,4 @@
         pull: yes
         restart_policy: always
         ports:
-          - "{{ app_port }}:8080"
+          - "{{ app_port }}:8085"

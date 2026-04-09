@@ -5,8 +5,6 @@ pipeline {
         DOCKERHUB_USERNAME = 'suprit43'
         DOCKERHUB_REPO = 'hp_webapp'
         VERSION = "${BUILD_ID}"
-        REQUEST_PORT = '80'
-        CONTAINER_PORT = '8080'
     }
 
     stages {
@@ -44,12 +42,13 @@ pipeline {
         stage('Deploy via Ansible') {
             steps {
                 sh '''
+                cd ansible
                 ansible-playbook -i inventory.ini deploy.yml --extra-vars "tag=${BUILD_ID}"
                 '''
             }
         }
 
-        stage("Clean Up") {
+        stage("Cleanup") {
             steps {
                 sh "docker image prune -f"
             }

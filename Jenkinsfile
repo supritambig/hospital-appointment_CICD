@@ -79,15 +79,15 @@ pipeline {
         }
 
         stage('Deploy via Ansible') {
-            steps {
-                sshagent(['ec2-key']) {   // 🔥 USE SSH KEY FROM JENKINS
-                    sh '''
-                    ANSIBLE_HOST_KEY_CHECKING=False \
-                    ansible-playbook -i inventory playbook.yml --extra-vars "tag=${BUILD_ID}"
-                    '''
-                }
-            }
+    steps {
+        sshagent(['ec2-key']) {
+            sh '''
+            ANSIBLE_HOST_KEY_CHECKING=False \
+            /usr/bin/ansible-playbook -i inventory playbook.yml --extra-vars "tag=${BUILD_ID}"
+            '''
         }
+    }
+}
         stage("Cleanup") {
             steps {
                 sh "docker image prune -f"

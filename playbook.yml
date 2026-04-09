@@ -20,6 +20,7 @@
         name: "{{ container_name }}"
         image: "{{ image_name }}:{{ tag }}"
         state: started
+        pull: yes
         restart_policy: always
         ports:
           - "{{ port }}:8080"

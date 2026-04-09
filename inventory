@@ -1,1 +1,2 @@
-[dev]
+[app-server]
+172.31.34.112 ansible_user=ubuntu

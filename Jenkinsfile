@@ -1,10 +1,6 @@
 pipeline {
     agent { label "slave_node_java" }
 
-    tools {
-        maven 'Maven 3'
-    }
-
     environment {
         DOCKERHUB_USERNAME = 'suprit43'
         DOCKERHUB_REPO = 'hp_webapp'
@@ -12,9 +8,23 @@ pipeline {
     }
 
     stages {
+        stage('Install Maven') {
+        steps {
+            sh '''
+            if ! command -v mvn > /dev/null; then
+                echo "Installing Maven..."
+                sudo apt update
+                sudo apt install maven -y
+            else
+                echo "Maven already installed"
+            fi
+            '''
+            }
+        }
 
         stage('Build Maven') {
             steps {
+                sh 'mvn -version'
                 sh 'mvn clean package -DskipTests'
             }
         }

@@ -8,17 +8,18 @@ pipeline {
     }
 
     stages {
+
         stage('Install Maven') {
-        steps {
-            sh '''
-            if ! command -v mvn > /dev/null; then
-                echo "Installing Maven..."
-                sudo apt update
-                sudo apt install maven -y
-            else
-                echo "Maven already installed"
-            fi
-            '''
+            steps {
+                sh '''
+                if ! command -v mvn > /dev/null; then
+                    echo "Installing Maven..."
+                    sudo apt update
+                    sudo apt install maven -y
+                else
+                    echo "Maven already installed"
+                fi
+                '''
             }
         }
 
@@ -28,38 +29,34 @@ pipeline {
                 sh 'mvn clean package -DskipTests'
             }
         }
+
         stage('Install Docker') {
-    steps {
-        sh '''
-        if ! command -v docker > /dev/null; then
-            echo "Installing Docker..."
+            steps {
+                sh '''
+                if ! command -v docker > /dev/null; then
+                    echo "Installing Docker..."
+                    sudo apt update
+                    sudo apt install docker.io -y
+                    sudo systemctl start docker
+                    sudo systemctl enable docker
+                    sudo chmod 666 /var/run/docker.sock
+                else
+                    echo "Docker already installed"
+                fi
 
-            # Update packages
-            sudo apt update
-
-            # Install Docker
-            sudo apt install docker.io -y
-
-            # Start and enable Docker
-            sudo systemctl start docker
-            sudo systemctl enable docker
-
-            # Fix permission (important for Jenkins user)
-            sudo chmod 666 /var/run/docker.sock
-
-            echo "Docker installed successfully"
-        else
-            echo "Docker already installed"
-        fi
-
-        docker --version
-        '''
-    }
-}
+                docker --version
+                '''
+            }
+        }
 
         stage("Build Docker Image") {
             steps {
-                sh "docker build -t ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${VERSION} ."
+                sh """
+                docker build -t ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${VERSION} .
+                
+                # 🔥 IMPORTANT FIX (tag latest)
+                docker tag ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${VERSION} ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:latest
+                """
             }
         }
 

@@ -6,15 +6,39 @@
     image_name: suprit43/hp_webapp
     tag: "{{ tag }}"
     container_name: hospital-app
-    app_port: 80
+    db_container: mysql-db
+    network_name: hospital-net
+    app_port: 8085
 
   tasks:
 
+    # 🔹 Create Docker Network
+    - name: Create Docker network
+      community.docker.docker_network:
+        name: "{{ network_name }}"
+
+    # 🔹 Run MySQL Container
+    - name: Run MySQL container
+      community.docker.docker_container:
+        name: "{{ db_container }}"
+        image: mysql:8
+        state: started
+        restart_policy: always
+        networks:
+          - name: "{{ network_name }}"
+        env:
+          MYSQL_ROOT_PASSWORD: "1234"
+          MYSQL_DATABASE: "hospitaldb"
+        ports:
+          - "3306:3306"
+
+    # 🔹 Remove old app container
     - name: Remove old container
       community.docker.docker_container:
         name: "{{ container_name }}"
         state: absent
 
+    # 🔹 Run Application Container
     - name: Run new container
       community.docker.docker_container:
         name: "{{ container_name }}"
@@ -22,5 +46,7 @@
         state: started
         pull: yes
         restart_policy: always
+        networks:
+          - name: "{{ network_name }}"
         ports:
           - "{{ app_port }}:8085"

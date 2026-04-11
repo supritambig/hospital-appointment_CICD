@@ -69,7 +69,7 @@ pipeline {
         stage('Deploy using Ansible') {
             steps {
                 sh '''
-                ansible-playbook -i ansible/inventory ansible/playbook.yml
+                /usr/bin/ansible-playbook -i ansible/inventory ansible/playbook.yml
                 '''
             }
         }

@@ -1,43 +1,25 @@
-- name: Deploy Hospital App
-  hosts: web
-  become: yes
-  gather_facts: no
+tasks:
+  - name: Ensure Docker is running
+    service:
+      name: docker
+      state: started
+      enabled: true
 
-  vars:
-    image_name: "suprit43/hospital-app:latest"
-    container_name: "hospital-app"
-    app_port: 8003
-    host_port: 80
+  - name: Pull latest Docker image
+    community.docker.docker_image:
+      name: "{{ image_name }}"
+      source: pull
 
-  tasks:
+  - name: Remove old container
+    community.docker.docker_container:
+      name: "{{ container_name }}"
+      state: absent
 
-    - name: Install Docker
-      apt:
-        name: docker.io
-        state: present
-        update_cache: yes
-
-    - name: Start Docker service
-      service:
-        name: docker
-        state: started
-        enabled: true
-
-    - name: Pull latest Docker image
-      community.docker.docker_image:
-        name: "{{ image_name }}"
-        source: pull
-
-    - name: Stop and remove old container
-      community.docker.docker_container:
-        name: "{{ container_name }}"
-        state: absent
-
-    - name: Run new container
-      community.docker.docker_container:
-        name: "{{ container_name }}"
-        image: "{{ image_name }}"
-        state: started
-        restart_policy: always
-        ports:
-          - "{{ host_port }}:{{ app_port }}"
+  - name: Run container
+    community.docker.docker_container:
+      name: "{{ container_name }}"
+      image: "{{ image_name }}"
+      state: started
+      restart_policy: always
+      ports:
+        - "{{ host_port }}:{{ app_port }}"

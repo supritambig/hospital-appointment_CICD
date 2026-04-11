@@ -9,13 +9,6 @@ pipeline {
 
     stages {
 
-        stage('Build Maven') {
-            steps {
-                sh 'mvn -version'
-                sh 'mvn clean package -DskipTests'
-            }
-        }
-
         stage('Install Docker') {
             steps {
                 sh '''

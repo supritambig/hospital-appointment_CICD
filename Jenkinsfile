@@ -1,75 +1,92 @@
 pipeline {
-    agent { label "slave_node_java" }
+    agent {
+        label "slave_node_java"
+    }
 
     environment {
-        DOCKERHUB_USERNAME = 'suprit43'
-        DOCKERHUB_REPO = 'hp_webapp'
-        VERSION = "${BUILD_ID}"
+        DOCKER_IMAGE = "webapp"
+        CONTAINER_NAME = "app"
+        CONTAINER_PORT = "80"
+        REQUEST_PORT = "8080"
     }
 
     stages {
 
-        stage('Install Docker') {
+        stage("Install Docker If Not Present") {
             steps {
-                sh '''
-                if ! command -v docker > /dev/null; then
-                    echo "Installing Docker..."
-                    sudo apt update
-                    sudo apt install docker.io -y
+                sh """
+                if ! command -v docker > /dev/null 2>&1; then
+                    echo "Docker not found. Installing Docker..."
+                    
+                    sudo apt-get update
+                    sudo apt-get install -y docker.io
+                    
                     sudo systemctl start docker
                     sudo systemctl enable docker
-                    sudo chmod 666 /var/run/docker.sock
+                    
+                    sudo usermod -aG docker jenkins
                 else
                     echo "Docker already installed"
                 fi
+                """
+            }
+        }
 
-                docker --version
-                '''
+        stage("Check Docker Version") {
+            steps {
+                sh "sudo docker --version"
+            }
+        }
+        
+        stage("Install Maven If Not Present") {
+            steps {
+                sh """
+                if ! command -v mvn > /dev/null 2>&1; then
+                    echo "Maven not found. Installing Maven..."
+                    
+                    sudo apt-get update
+                    sudo apt-get install -y maven
+                else
+                    echo "Maven already installed"
+                fi
+                """
+            }
+        }
+
+        stage("Build Application (Maven)") {
+            steps {
+                sh "mvn clean package"
             }
         }
 
         stage("Build Docker Image") {
             steps {
+                sh "sudo docker build -t ${DOCKER_IMAGE} ."
+            }
+        }
+
+        stage("Remove Old Container") {
+            steps {
+                sh "sudo docker rm -f ${CONTAINER_NAME} || true"
+            }
+        }
+
+        stage("Run Docker Container") {
+            steps {
                 sh """
-                docker build -t ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${VERSION} .
-                
-                # 🔥 IMPORTANT FIX (tag latest)
-                docker tag ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${VERSION} ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:latest
+                sudo docker run -d \
+                --name ${CONTAINER_NAME} \
+                -p ${CONTAINER_PORT}:${REQUEST_PORT} \
+                ${DOCKER_IMAGE}
                 """
             }
         }
 
-        stage("Docker Login") {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker_login',
-                usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh "echo $PASS | docker login -u $USER --password-stdin"
-                }
-            }
-        }
-
-        stage("Push Image") {
+        stage("Cleanup Old Images") {
             steps {
                 sh """
-                docker push ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:${VERSION}
-                docker push ${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}:latest
+                sudo docker rmi -f ${DOCKER_IMAGE} || true
                 """
-            }
-        }
-
-        stage('Deploy via Ansible') {
-    steps {
-        sshagent(['ec2-key']) {
-            sh '''
-            ANSIBLE_HOST_KEY_CHECKING=False \
-            /usr/bin/ansible-playbook -i inventory playbook.yml --extra-vars "tag=${BUILD_ID}"
-            '''
-        }
-    }
-}
-        stage("Cleanup") {
-            steps {
-                sh "docker image prune -f"
             }
         }
     }

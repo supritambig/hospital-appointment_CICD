@@ -1,6 +1,7 @@
 - name: Deploy Hospital App
   hosts: web
   become: yes
+  gather_facts: no
 
   vars:
     image_name: "suprit43/hospital-app:latest"
@@ -10,7 +11,7 @@
 
   tasks:
 
-    - name: Install Docker (if not installed)
+    - name: Install Docker
       apt:
         name: docker.io
         state: present
@@ -23,19 +24,20 @@
         enabled: true
 
     - name: Pull latest Docker image
-      command: docker pull {{ image_name }}
+      community.docker.docker_image:
+        name: "{{ image_name }}"
+        source: pull
 
-    - name: Stop existing container
-      command: docker stop {{ container_name }}
-      ignore_errors: yes
-
-    - name: Remove existing container
-      command: docker rm {{ container_name }}
-      ignore_errors: yes
+    - name: Stop and remove old container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        state: absent
 
     - name: Run new container
-      command: >
-        docker run -d
-        -p {{ host_port }}:{{ app_port }}
-        --name {{ container_name }}
-        {{ image_name }}
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ image_name }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "{{ host_port }}:{{ app_port }}"

@@ -4,10 +4,10 @@ pipeline {
     }
 
     environment {
-        DOCKERHUB_USERNAME = credentials('suprit43')
-        DOCKERHUB_PASSWORD = credentials('Suprit@145')
-        IMAGE_NAME = 'hospital-app'
-        VERSION = "${BUILD_NUMBER}"
+        DOCKER_IMAGE = "webapp"
+        CONTAINER_NAME = "app"
+        CONTAINER_PORT = "80"
+        REQUEST_PORT = "8080"
     }
 
     stages {
@@ -36,32 +36,36 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage("Build Docker Image") {
             steps {
-                sh '''
-                docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME:$VERSION .
-                '''
+                sh "sudo docker build -t ${DOCKER_IMAGE} ."
             }
         }
 
-        stage('Login to DockerHub') {
+        stage("Remove Old Container") {
             steps {
-                sh '''
-                echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
-                '''
+                sh "sudo docker rm -f ${CONTAINER_NAME} || true"
             }
         }
 
-        stage('Push Docker Image') {
+        stage("Run Docker Container") {
             steps {
-                sh '''
-                docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:$VERSION
-                docker tag $DOCKERHUB_USERNAME/$IMAGE_NAME:$VERSION $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
-                docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
-                '''
+                sh """
+                sudo docker run -d \
+                --name ${CONTAINER_NAME} \
+                -p ${CONTAINER_PORT}:${REQUEST_PORT} \
+                ${DOCKER_IMAGE}
+                """
             }
         }
 
+        stage("Cleanup Old Images") {
+            steps {
+                sh """
+                sudo docker rmi -f ${DOCKER_IMAGE} || true
+                """
+            }
+        }
         stage('Deploy using Ansible') {
             steps {
                 sh '''

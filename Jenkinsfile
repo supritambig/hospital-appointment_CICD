@@ -1,99 +1,53 @@
 pipeline {
-    agent {
-        label "slave_node_java"
-    }
+    agent any
 
     environment {
-        DOCKER_IMAGE = "webapp"
-        CONTAINER_NAME = "app"
-        CONTAINER_PORT = "80"
-        REQUEST_PORT = "8080"
+        DOCKERHUB_USERNAME = credentials('suprit43')
+        DOCKERHUB_PASSWORD = credentials('Suprit@145')
+        IMAGE_NAME = 'hospital-app'
+        VERSION = "${BUILD_NUMBER}"
     }
 
     stages {
 
-        stage("Install Docker If Not Present") {
+        stage('Build Docker Image') {
             steps {
-                sh """
-                if ! command -v docker > /dev/null 2>&1; then
-                    echo "Docker not found. Installing Docker..."
-                    
-                    sudo apt-get update
-                    sudo apt-get install -y docker.io
-                    
-                    sudo systemctl start docker
-                    sudo systemctl enable docker
-                    
-                    sudo usermod -aG docker jenkins
-                else
-                    echo "Docker already installed"
-                fi
-                """
+                sh '''
+                docker build -t $DOCKERHUB_USERNAME/$IMAGE_NAME:$VERSION .
+                '''
             }
         }
 
-        stage("Check Docker Version") {
+        stage('Login to DockerHub') {
             steps {
-                sh "sudo docker --version"
-            }
-        }
-        
-        stage("Install Maven If Not Present") {
-            steps {
-                sh """
-                if ! command -v mvn > /dev/null 2>&1; then
-                    echo "Maven not found. Installing Maven..."
-                    
-                    sudo apt-get update
-                    sudo apt-get install -y maven
-                else
-                    echo "Maven already installed"
-                fi
-                """
+                sh '''
+                echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+                '''
             }
         }
 
-        stage("Build Application (Maven)") {
+        stage('Push Docker Image') {
             steps {
-                sh "mvn clean package"
+                sh '''
+                docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:$VERSION
+                docker tag $DOCKERHUB_USERNAME/$IMAGE_NAME:$VERSION $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
+                docker push $DOCKERHUB_USERNAME/$IMAGE_NAME:latest
+                '''
             }
         }
 
-        stage("Build Docker Image") {
+        stage('Deploy using Ansible') {
             steps {
-                sh "sudo docker build -t ${DOCKER_IMAGE} ."
+                sh '''
+                ansible-playbook -i ansible/inventory ansible/deploy.yml
+                '''
             }
         }
+    }
 
-        stage("Remove Old Container") {
-            steps {
-                sh "sudo docker rm -f ${CONTAINER_NAME} || true"
-            }
-        }
-
-        stage("Run Docker Container") {
-            steps {
-                sh """
-                sudo docker run -d \
-                --name ${CONTAINER_NAME} \
-                -p ${CONTAINER_PORT}:${REQUEST_PORT} \
-                ${DOCKER_IMAGE}
-                """
-            }
-        }
-
-        stage("Cleanup Old Images") {
-            steps {
-                sh """
-                sudo docker rmi -f ${DOCKER_IMAGE} || true
-                """
-            }
-        }
-        stage('Run Ansible Playbook') {
-            agent any
-            steps {
-                sh 'ansible-playbook -i inventory playbook.yml'
-            }
+    post {
+        always {
+            sh 'docker system prune -f'
         }
     }
 }

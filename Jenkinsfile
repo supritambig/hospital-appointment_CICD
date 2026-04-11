@@ -11,6 +11,30 @@ pipeline {
     }
 
     stages {
+        stage("Install Docker If Not Present") {
+            steps {
+                sh """
+                if ! command -v docker > /dev/null 2>&1; then
+                    echo "Docker not found. Installing Docker..."
+                    
+                    sudo apt-get update
+                    sudo apt-get install -y docker.io
+                    
+                    sudo systemctl start docker
+                    sudo systemctl enable docker
+                    
+                    sudo usermod -aG docker jenkins
+                else
+                    echo "Docker already installed"
+                fi
+                """
+            }
+        }
+        stage("Check Docker Version") {
+            steps {
+                sh "sudo docker --version"
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
@@ -41,7 +65,7 @@ pipeline {
         stage('Deploy using Ansible') {
             steps {
                 sh '''
-                ansible-playbook -i ansible/inventory ansible/deploy.yml
+                ansible-playbook -i ansible/inventory ansible/playbook.yml
                 '''
             }
         }

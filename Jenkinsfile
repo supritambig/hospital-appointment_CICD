@@ -9,20 +9,6 @@ pipeline {
 
     stages {
 
-        stage('Install Maven') {
-            steps {
-                sh '''
-                if ! command -v mvn > /dev/null; then
-                    echo "Installing Maven..."
-                    sudo apt update
-                    sudo apt install maven -y
-                else
-                    echo "Maven already installed"
-                fi
-                '''
-            }
-        }
-
         stage('Build Maven') {
             steps {
                 sh 'mvn -version'

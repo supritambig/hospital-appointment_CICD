@@ -89,5 +89,11 @@ pipeline {
                 """
             }
         }
+        stage('Run Ansible Playbook') {
+            agent any
+            steps {
+                sh 'ansible-playbook -i inventory playbook.yml'
+            }
+        }
     }
 }

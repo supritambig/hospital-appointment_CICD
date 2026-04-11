@@ -2,17 +2,20 @@
 FROM maven:3.8.8-eclipse-temurin-17 AS builder
 WORKDIR /app
 
-# Copy Maven config & source
-COPY pom.xml mvnw* ./
+# Copy project files
+COPY pom.xml .
 COPY src ./src
 
-# Build application (skip tests for faster builds, enable tests in CI)
-RUN mvn clean -DskipTests package
+# Build JAR
+RUN mvn clean package -DskipTests
 
+# === Stage 2: Run application ===
 FROM eclipse-temurin:17-jdk-jammy
-
 WORKDIR /app
 
-COPY target/*.jar app.jar
+# Copy JAR from builder stage ✅
+COPY --from=builder /app/target/*.jar app.jar
+
+EXPOSE 8003
 
 ENTRYPOINT ["java","-jar","app.jar"]
